@@ -343,7 +343,7 @@
                     let chatHistory = [];
                     chatHistory.push({ role: "user", parts: [{ text: `Berikan ide desain untuk pakaian konveksi berdasarkan deskripsi berikut: "${prompt}". Fokus pada gaya, warna, bahan yang cocok, dan detail unik. Berikan dalam format poin-poin yang mudah dibaca.` }] });
                     const payload = { contents: chatHistory };
-                    const apiKey = ""; // Leave this as-is; Canvas will provide it at runtime.
+                    const apiKey = "AIzaSyAf_NGfvYg16-q8-4NrjmjOglVrWX45ffs"; // Leave this as-is; Canvas will provide it at runtime.
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                     const response = await fetch(apiUrl, {
