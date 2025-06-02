@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ipang Konveksi - Solusi Pakaian Muslimah Profesional</title>
+    <!-- Visualization & Content Choices:
+        - Hero: Inform -> Strong headline and supporting text over a relevant background image. Provides immediate context.
+        - Keunggulan: Inform/Compare -> Grid of concise cards with Unicode icons. HTML/CSS. Clearly presents advantages.
+        - Layanan: Organize -> Grid of service descriptions. HTML/CSS. Easy to scan and understand services.
+        - Proses: Organize/Change -> Step-by-step horizontal layout with numeric indicators. HTML/CSS/Tailwind. Visualizes the operational flow simply, promoting transparency.
+        - Portofolio: Organize/Compare -> Interactive image gallery with category filters (Kaos, Gamis, Mukena, Jilbab). HTML + JS. Allows users to explore specific product types, enhancing interaction and showcasing versatility. Each image is a direct representation of provided files, offering visual evidence of quality.
+        - Konsultasi Desain: Interact/Generate -> Textarea for user input, button to trigger LLM, and a display area for AI-generated design ideas. Uses Fetch API to call Gemini 2.0 Flash. This feature adds a dynamic, AI-powered consultation aspect to the website.
+        - Kontak: Inform/Interact -> Form and comprehensive contact details. HTML/CSS + basic JS for form. Provides multiple channels for inquiry.
+        - Logo: The provided logo image is integrated into the header.
+        - Justification: This approach prioritizes clear information delivery and visual appeal, utilizing provided image assets effectively. The interactive elements (portfolio filter, mobile menu, and new AI design consultant) enhance user engagement while keeping the SPA lightweight and performant. No external charting libraries are used as the content does not require complex data visualization. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; /* Clean white background */ }
+        .hero-section { background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://placehold.co/1920x1080/4A5568/E2E8F0?text=Workshop+Konveksi') no-repeat center center/cover; }
+        .section-title::after { content: ''; display: block; width: 50px; height: 3px; background-color: #3b82f6; margin: 8px auto 0; border-radius: 2px; }
+        .step-item:not(:last-child)::after { content: '→'; color: #d1d5db; position: absolute; right: -2rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
+        @media (max-width: 767px) { .step-item:not(:last-child)::after { content: '↓'; right: 50%; transform: translateX(50%); top: 100%; margin-top: 1rem; } }
+        .portfolio-btn.active { background-color: #3b82f6; color: white; }
+        .portfolio-item { transition: transform 0.3s ease-out, opacity 0.3s ease-out; }
+        .portfolio-item.hidden { transform: scale(0.95); opacity: 0; position: absolute; /* To prevent layout shift when hidden */ }
+        #portfolio-grid { display: grid; /* Maintain grid for responsive layout */ }
+
+        /* Loading spinner styles */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3b82f6; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="flex items-center gap-2">
+                    <img src="IMG-20250530-WA0000.jpg" alt="Logo Ipang Konveksi" class="h-8 w-auto">
+                    <span class="text-2xl font-bold text-gray-900">Ipang Konveksi</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#keunggulan" class="text-gray-600 hover:text-blue-600">Keunggulan</a>
+                    <a href="#layanan" class="text-gray-600 hover:text-blue-600">Layanan</a>
+                    <a href="#proses" class="text-gray-600 hover:text-blue-600">Proses</a>
+                    <a href="#portofolio" class="text-gray-600 hover:text-blue-600">Portofolio</a>
+                    <a href="#design-consultation" class="text-gray-600 hover:text-blue-600">Konsultasi Desain ✨</a>
+                </nav>
+                <div class="flex items-center">
+                    <a href="#kontak" class="hidden sm:inline-block bg-blue-600 text-white font-medium px-5 py-2 rounded-full hover:bg-blue-700 transition-colors">Hubungi Kami</a>
+                    <button id="mobile-menu-btn" class="md:hidden ml-4 text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+            <nav class="flex flex-col p-4 space-y-2">
+                <a href="#keunggulan" class="nav-link text-gray-700 hover:bg-gray-100 p-2 rounded">Keunggulan</a>
+                <a href="#layanan" class="nav-link text-gray-700 hover:bg-gray-100 p-2 rounded">Layanan</a>
+                <a href="#proses" class="nav-link text-gray-700 hover:bg-gray-100 p-2 rounded">Proses</a>
+                <a href="#portofolio" class="nav-link text-gray-700 hover:bg-gray-100 p-2 rounded">Portofolio</a>
+                <a href="#design-consultation" class="nav-link text-gray-700 hover:bg-gray-100 p-2 rounded">Konsultasi Desain ✨</a>
+                <a href="#kontak" class="nav-link bg-blue-600 text-white text-center font-medium mt-2 px-5 py-2 rounded-full hover:bg-blue-700 transition-colors">Hubungi Kami</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="hero-section min-h-[75vh] flex items-center justify-center text-white text-center p-4">
+            <div class="container mx-auto">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-up">Wujudkan Pakaian Impian Anda Bersama Ipang Konveksi</h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8 animate-fade-in-up delay-200">Mitra terpercaya Anda dalam produksi pakaian berkualitas tinggi, mulai dari seragam, gamis, hingga mukena dengan sentuhan personal.</p>
+                <a href="#layanan" class="bg-white text-blue-600 font-bold px-8 py-3 rounded-full text-lg hover:bg-gray-200 transition-colors animate-fade-in-up delay-400">Jelajahi Layanan Kami</a>
+            </div>
+        </section>
+
+        <section id="keunggulan" class="py-20 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title text-gray-800">Keunggulan Ipang Konveksi</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Kami berkomitmen memberikan yang terbaik untuk setiap proyek Anda. Berikut adalah alasan mengapa kami menjadi pilihan tepat.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-4 text-blue-600">✨</div><h3 class="text-xl font-semibold mb-2">Kualitas Terjamin</h3><p class="text-gray-600">Material pilihan dan kontrol kualitas ketat memastikan produk awet dan nyaman.</p>
+                    </div>
+                    <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-4 text-blue-600">✂️</div><h3 class="text-xl font-semibold mb-2">Presisi Jahitan</h3><p class="text-gray-600">Dikerjakan oleh penjahit berpengalaman dengan detail sempurna.</p>
+                    </div>
+                    <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-4 text-blue-600">⏰</div><h3 class="text-xl font-semibold mb-2">Tepat Waktu</h3><p class="text-gray-600">Pengiriman sesuai jadwal yang disepakati, tanpa kompromi.</p>
+                    </div>
+                    <div class="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-4 text-blue-600">🎨</div><h3 class="text-xl font-semibold mb-2">Desain Kustom</h3><p class="text-gray-600">Wujudkan ide Anda menjadi kenyataan dengan tim desain kami.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="layanan" class="py-20 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title text-gray-800">Layanan Lengkap Kami</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Kami menawarkan berbagai layanan konveksi untuk memenuhi kebutuhan individu, komunitas, hingga perusahaan.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 rounded-xl p-8 group hover:bg-blue-50 transition-colors">
+                        <h3 class="text-xl font-bold mb-2">Gamis & Abaya</h3><p class="text-gray-600">Produksi gamis dan abaya syar'i dengan berbagai model, bahan, dan detail jahitan eksklusif.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-8 group hover:bg-blue-50 transition-colors">
+                        <h3 class="text-xl font-bold mb-2">Mukena</h3><p class="text-gray-600">Pembuatan mukena dengan desain simpel, anggun, dan nyaman untuk beribadah.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-8 group hover:bg-blue-50 transition-colors">
+                        <h3 class="text-xl font-bold mb-2">Kerudung & Jilbab</h3><p class="text-gray-600">Produksi kerudung dan jilbab syar'i dengan pilihan bahan yang jatuh dan tidak menerawang.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-8 group hover:bg-blue-50 transition-colors">
+                        <h3 class="text-xl font-bold mb-2">Seragam Muslim</h3><p class="text-gray-600">Seragam kantor, sekolah, atau komunitas dengan desain Islami yang modis dan sopan.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-8 group hover:bg-blue-50 transition-colors">
+                        <h3 class="text-xl font-bold mb-2">Pakaian Custom</h3><p class="text-gray-600">Menerima pesanan pakaian custom sesuai desain dan spesifikasi Anda.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-8 group hover:bg-blue-50 transition-colors">
+                        <h3 class="text-xl font-bold mb-2">Jasa Jahit Maklun</h3><p class="text-gray-600">Layanan jasa jahit (CMT) untuk brand fashion Anda dengan kualitas terdepan.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="proses" class="py-20 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title text-gray-800">Alur Produksi Kami</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Kami memastikan setiap tahapan produksi berjalan transparan dan efisien, dari ide hingga produk jadi.</p>
+                </div>
+                <div class="flex flex-col md:flex-row justify-center items-start md:items-center gap-y-12 md:gap-x-16 relative">
+                    <div class="text-center flex-1 relative step-item"><div class="text-blue-600 font-bold text-5xl mb-2">1</div><h3 class="font-semibold text-lg">Konsultasi & Desain</h3><p class="text-gray-500 text-sm">Diskusi detail, pemilihan bahan, dan persetujuan desain akhir.</p></div>
+                    <div class="text-center flex-1 relative step-item"><div class="text-blue-600 font-bold text-5xl mb-2">2</div><h3 class="font-semibold text-lg">Pola & Cutting</h3><p class="text-gray-500 text-sm">Pembuatan pola presisi dan pemotongan bahan secara profesional.</p></div>
+                    <div class="text-center flex-1 relative step-item"><div class="text-blue-600 font-bold text-5xl mb-2">3</div><h3 class="font-semibold text-lg">Penjahitan</h3><p class="text-gray-500 text-sm">Proses jahitan oleh tim ahli dengan fokus pada detail dan kerapian.</p></div>
+                    <div class="text-center flex-1 relative"><div class="text-blue-600 font-bold text-5xl mb-2">4</div><h3 class="font-semibold text-lg">Finishing & QC</h3><p class="text-gray-500 text-sm">Pemeriksaan kualitas, steam, packing, dan persiapan pengiriman.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="portofolio" class="py-20 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title text-gray-800">Galeri Produk Kami</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Lihat hasil karya kami yang mencerminkan komitmen kami terhadap kualitas dan estetika dalam setiap detailnya.</p>
+                </div>
+                <div class="flex justify-center flex-wrap gap-2 mb-8">
+                    <button class="portfolio-btn active bg-gray-200 text-gray-800 font-medium px-4 py-2 rounded-full transition-colors" data-filter="all">Semua</button>
+                    <button class="portfolio-btn bg-gray-200 text-gray-800 font-medium px-4 py-2 rounded-full transition-colors" data-filter="mukena">Mukena</button>
+                    <button class="portfolio-btn bg-gray-200 text-gray-800 font-medium px-4 py-2 rounded-full transition-colors" data-filter="gamis">Gamis</button>
+                    <button class="portfolio-btn bg-gray-200 text-gray-800 font-medium px-4 py-2 rounded-full transition-colors" data-filter="jilbab">Jilbab & Telekung</button>
+                </div>
+                <div id="portfolio-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative">
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="mukena">
+                        <img src="1748881964583.jpg" alt="Mukena Putih Simpel" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="gamis">
+                        <img src="1748881980014.jpg" alt="Gamis Lilac Kombinasi Mint" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="gamis">
+                        <img src="1748882055854.jpg" alt="Gamis Hitam Motif" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="gamis">
+                        <img src="1748882033068.jpg" alt="Gamis Coklat Gelap Elegan" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="gamis">
+                        <img src="1748882014652.jpg" alt="Jubah Dusty Pink Polos" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="jilbab">
+                        <img src="1748881998360.jpg" alt="Telekung Navy Blue Syar'i" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="jilbab">
+                        <img src="6567911291442135880.jpeg" alt="Jilbab Dusty Pink Modis" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="gamis">
+                        <img src="6644052920649703861.jpeg" alt="Gamis Coklat Elegan Casual" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="portfolio-item group overflow-hidden rounded-lg shadow-md" data-category="jilbab">
+                        <img src="11383000828910180531.jpeg" alt="Jilbab Syar'i Maroon Modern" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="design-consultation" class="py-20 md:py-24 bg-blue-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold section-title text-gray-800">Konsultasi Desain ✨</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto mb-8">Dapatkan ide desain pakaian yang unik dan sesuai keinginan Anda dengan bantuan AI kami. Cukup ceritakan kebutuhan Anda!</p>
+                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8 md:p-10">
+                    <textarea id="design-prompt" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4 h-32" placeholder="Contoh: Saya ingin gamis syar'i untuk acara pernikahan, warnanya lembut dan elegan."></textarea>
+                    <button id="generate-design-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors w-full md:w-auto">Dapatkan Ide Desain ✨</button>
+                    <div id="design-output-loader" class="loader"></div>
+                    <div id="design-output" class="mt-6 p-4 bg-gray-100 rounded-lg text-left text-gray-700 leading-relaxed min-h-[100px] flex items-center justify-center">
+                        <p class="text-gray-500">Ide desain akan muncul di sini.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="kontak" class="py-20 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold section-title text-gray-800">Hubungi Kami</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Mari wujudkan ide pakaian Anda. Kirimkan pesan atau hubungi kami melalui informasi di bawah ini.</p>
+                </div>
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 md:p-12 grid md:grid-cols-2 gap-12">
+                    <form action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" class="space-y-6">
+                        <div><label for="name" class="font-medium">Nama Lengkap</label><input type="text" id="name" name="name" class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></div>
+                        <div><label for="email" class="font-medium">Email</label><input type="email" id="email" name="_replyto" class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></div>
+                        <div><label for="service" class="font-medium">Jenis Pesanan</label><select id="service" name="Jenis Pesanan" class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><option>Gamis & Abaya</option><option>Mukena</option><option>Kerudung & Jilbab</option><option>Seragam Muslim</option><option>Pakaian Custom</option><option>Jasa Jahit Maklun</option><option>Lain-lain</option></select></div>
+                        <div><label for="message" class="font-medium">Pesan Anda</label><textarea id="message" name="message" rows="5" class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea></div>
+                        <div><button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">Kirim Pesan</button></div>
+                    </form>
+                    <div class="space-y-6">
+                        <div><h3 class="text-xl font-semibold">Informasi Kontak & Lokasi</h3><p class="text-gray-600 mt-2">Jangan ragu untuk menghubungi kami melalui saluran berikut.</p></div>
+                        <div class="flex items-start gap-4">
+                            <span class="mt-1 text-2xl">📍</span>
+                            <div><h4 class="font-semibold">Alamat</h4><p class="text-gray-600">Rancapanjang RT03/RW04 Desa. Sukamulya Kec. Rancaekek Kab. Bandung 40394</p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="mt-1 text-2xl">📞</span>
+                            <div><h4 class="font-semibold">WhatsApp</h4><p class="text-gray-600"><a href="https://wa.me/62881023706063" target="_blank" class="text-blue-600 hover:underline">0881023706063</a></p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="mt-1 text-2xl">📸</span>
+                            <div><h4 class="font-semibold">Instagram</h4><p class="text-gray-600"><a href="https://instagram.com/ipangkonveksi" target="_blank" class="text-blue-600 hover:underline">@ipangkonveksi</a></p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="mt-1 text-2xl">🎵</span>
+                            <div><h4 class="font-semibold">TikTok</h4><p class="text-gray-600"><a href="https://www.tiktok.com/@ipangkonveksi" target="_blank" class="text-blue-600 hover:underline">@ipangkonveksi</a></p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="mt-1 text-2xl">👍</span>
+                            <div><h4 class="font-semibold">Facebook</h4><p class="text-gray-600"><a href="https://www.facebook.com/share/16PHvcSRmq/?mibextid=qi2Omg" target="_blank" class="text-blue-600 hover:underline">Ipang Konveksi</a></p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p>&copy; 2024 Ipang Konveksi. Semua Hak Dilindungi.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = mobileMenu.querySelectorAll('.nav-link');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            const filterButtons = document.querySelectorAll('.portfolio-btn');
+            const portfolioGrid = document.getElementById('portfolio-grid');
+            const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const filter = button.getAttribute('data-filter');
+
+                    // Calculate maximum height of the grid to prevent jump when items are filtered
+                    let maxHeight = 0;
+                    portfolioItems.forEach(item => {
+                        if (!item.classList.contains('hidden')) {
+                            maxHeight = Math.max(maxHeight, item.offsetHeight);
+                        }
+                    });
+                    portfolioGrid.style.minHeight = `${maxHeight}px`; // Set min-height to prevent collapse
+
+                    portfolioItems.forEach(item => {
+                        const category = item.getAttribute('data-category');
+                        if (filter === 'all' || filter === category) {
+                            item.classList.remove('hidden');
+                            item.style.position = ''; // Reset position
+                            item.style.visibility = ''; // Reset visibility
+                        } else {
+                            item.classList.add('hidden');
+                            item.style.position = 'absolute'; // Hide visually without taking up space
+                            item.style.visibility = 'hidden'; // Ensure hidden
+                        }
+                    });
+
+                    // Reset min-height after transition for smooth re-layout
+                    setTimeout(() => {
+                        portfolioGrid.style.minHeight = '';
+                    }, 300); // Match transition duration
+                });
+            });
+
+            // Gemini API Integration for Design Consultation
+            const designPromptInput = document.getElementById('design-prompt');
+            const generateDesignBtn = document.getElementById('generate-design-btn');
+            const designOutputDiv = document.getElementById('design-output');
+            const designOutputLoader = document.getElementById('design-output-loader');
+
+            generateDesignBtn.addEventListener('click', async () => {
+                const prompt = designPromptInput.value.trim();
+                if (!prompt) {
+                    designOutputDiv.innerHTML = '<p class="text-red-500">Mohon masukkan ide desain Anda.</p>';
+                    return;
+                }
+
+                designOutputDiv.innerHTML = ''; // Clear previous output
+                designOutputLoader.style.display = 'block'; // Show loader
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Berikan ide desain untuk pakaian konveksi berdasarkan deskripsi berikut: "${prompt}". Fokus pada gaya, warna, bahan yang cocok, dan detail unik. Berikan dalam format poin-poin yang mudah dibaca.` }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // Leave this as-is; Canvas will provide it at runtime.
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        designOutputDiv.innerHTML = `<p>${text.replace(/\n/g, '<br>')}</p>`; // Display response, replace newlines with <br>
+                    } else {
+                        designOutputDiv.innerHTML = '<p class="text-red-500">Maaf, tidak dapat menghasilkan ide desain. Coba lagi.</p>';
+                        console.error('Unexpected API response structure:', result);
+                    }
+                } catch (error) {
+                    designOutputDiv.innerHTML = '<p class="text-red-500">Terjadi kesalahan saat menghubungi server. Mohon coba lagi.</p>';
+                    console.error('Error fetching design idea:', error);
+                } finally {
+                    designOutputLoader.style.display = 'none'; // Hide loader
+                }
+            });
+        });
+    </script>
+</body>
+</html>
